@@ -1,4 +1,6 @@
-using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.EntityFrameworkCore;
+using TaskManagement.Server.Data;
+using TaskManagement.Server.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,6 +8,17 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+builder.Services.AddScoped<TasksService>();
+builder.Services.AddSwaggerGen(opt =>
+{
+    opt.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Version = "v1",
+        Title = "Task Management Api"
+    });
+});
+builder.Services.AddDbContext<ApiDbContext>(optionsBuilder =>
+    optionsBuilder.UseNpgsql(builder.Configuration.GetConnectionString("BlazorTaskDbConnectionString")));
 
 var app = builder.Build();
 
@@ -13,6 +26,8 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseWebAssemblyDebugging();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 else
 {
