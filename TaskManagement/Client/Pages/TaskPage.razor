@@ -1,0 +1,94 @@
+@layout TaskLayout
+@page "/"
+@using Task = TaskManagement.Shared.Models.Task
+@using TaskManagement.Client.Services
+@inject TasksService TasksService
+@inject IJSRuntime JSRuntime
+<section class="vh-100">
+    <div class="container py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col">
+                <div class="card" id="list1" style="border-radius: .75rem; background-color: #eff1f2;">
+                    <div class="card-body py-4 px-4 px-md-5">
+
+                        <p class="h1 text-center mt-3 mb-4 pb-3 text-primary">
+                            <i class="fas fa-check-square me-1"></i>
+                            <u>List of Tasks</u>
+                        </p>
+
+                        <div class="pb-2">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex flex-row align-items-center">
+                                        <input type="text" class="form-control form-control-lg me-2" @bind="_task.Title" id="title"
+                                               placeholder="Title">
+                                        <input type="text" @bind="_task.Description" class="form-control form-control-lg me-2" id="description"
+                                               placeholder="Description">
+                                        <div>
+                                            <button type="button" class="btn btn-primary" @onclick="CreateTask">Add</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+                        @foreach (var task in _tasks)
+                        {
+                            <ul class="list-group list-group-horizontal rounded-0 mb-2">
+
+                                <li
+                                    class="list-group-item d-flex align-items-center ps-0 pe-3 py-1 rounded-0 border-0 bg-transparent">
+                                    <div class="form-check">
+                                        <input class="form-check-input me-0" type="checkbox" @bind="task.Done" @onclick="(() => MarkAsDone(task))" />
+                                    </div>
+                                </li>
+                                <li
+                                    class="list-group-item px-3 py-1 d-flex align-items-center flex-grow-1 border-0 bg-transparent">
+                                    <p class="lead fw-normal mb-0 bg-light w-100 ms-n2 ps-2 py-1 rounded">@task.Id @task.Title</p>
+                                </li>
+                                <li
+                                    class="list-group-item px-3 py-1 d-flex align-items-center flex-grow-1 border-0 bg-transparent">
+                                    <p class="lead fw-normal mb-0 bg-light w-100 ms-n2 ps-2 py-1 rounded">@task.Description</p>
+                                </li>
+
+                            </ul>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@code {
+    private Task _task = new();
+    private List<Task>? _tasks = new();
+
+    protected override async System.Threading.Tasks.Task OnInitializedAsync()
+    {
+        _tasks = await TasksService.GetAllTasks();
+        _tasks.OrderByDescending(t=>t.Id).OrderBy(t => t.Done == false);
+    }
+
+    private async void MarkAsDone(Task task)
+    {
+        task.Done = !task.Done;
+        await TasksService.UpdateTask(task.Id,task);
+    }
+    private async void CreateTask()
+    {
+        var alert = await JSRuntime.InvokeAsync<bool>("confirm", "Do you want to create this Task");
+        if (alert)
+        {
+            _task.Done = false;
+            var result = await TasksService.CreateTask(_task);
+            _task = new Task();
+            if (result)
+            {
+                await OnInitializedAsync();
+            }
+        }
+    }
+
+}
