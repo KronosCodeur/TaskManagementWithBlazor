@@ -15,13 +15,13 @@ public class TasksController:ControllerBase
         _tasksService = tasksService;
     }
 
-    [HttpGet]
+    [HttpGet("GetAllTasks")]
     public async Task<ActionResult<List<Task>>> GetAllTasks()
     {
         return Ok(await _tasksService.GetAllTasks());
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("GetTaskDetails/{id}")]
     public async Task<ActionResult<Task>> GetTaskDetails(int id)
     {
         var task = await _tasksService.GetTaskDetails(id);
@@ -33,14 +33,14 @@ public class TasksController:ControllerBase
         return Ok(task);
     }
 
-    [HttpPost]
+    [HttpPost("CreateTask")]
     public async Task<IActionResult> CreateTask(Task task)
     {
         await _tasksService.CreateTask(task);
         return CreatedAtAction(nameof(GetTaskDetails), task, task.Id);
     }
 
-    [HttpPut("{id}")]
+    [HttpPut("UpdateTask/{id}")]
     public async Task<IActionResult> UpdateTask(int id,Task task)
     {
         var result = await _tasksService.UpdateTask(id, task);
