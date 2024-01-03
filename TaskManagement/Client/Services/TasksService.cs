@@ -16,17 +16,17 @@ public class TasksService : TasksRepository
 
     public async Task<List<Task>?> GetAllTasks()
     {
-        return await _httpClient.GetFromJsonAsync<List<Task>>("api/Tasks");
+        return await _httpClient.GetFromJsonAsync<List<Task>>("api/Tasks/GetAllTasks");
     }
 
     public async Task<Task?> GetTaskDetails(int id)
     {
-        return await _httpClient.GetFromJsonAsync<Task?>($"api/Tasks/{id}");
+        return await _httpClient.GetFromJsonAsync<Task?>($"api/Tasks/GetTaskDetails/{id}");
     }
 
     public async Task<bool> UpdateTask(int id, Task task)
     {
-        var response = await _httpClient.PutAsJsonAsync($"api/Tasks/{id}",task);
+        var response = await _httpClient.PutAsJsonAsync($"api/Tasks/UpdateTask/{id}",task);
         if (response.StatusCode == HttpStatusCode.NoContent)
         {
             return true;
@@ -36,7 +36,7 @@ public class TasksService : TasksRepository
 
     public async Task<bool> CreateTask(Task task)
     {
-        var response = await _httpClient.PostAsJsonAsync("api/Tasks", task);
+        var response = await _httpClient.PostAsJsonAsync("api/Tasks/CreateTask", task);
         if (response.StatusCode==HttpStatusCode.Created)
         {
             return true;
